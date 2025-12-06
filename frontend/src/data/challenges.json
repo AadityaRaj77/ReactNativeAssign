@@ -1,0 +1,37 @@
+[
+{
+"id": 1,
+"title": "Drink 2L of Water",
+"description": "Stay hydrated by drinking 2 liters of water today! Helps energy and skin.",
+"category": "Health",
+"difficulty": "Easy"
+},
+{
+"id": 2,
+"title": "30-min Walk",
+"description": "Go for a 30-minute brisk walk outside. Fresh air + movement.",
+"category": "Fitness",
+"difficulty": "Easy"
+},
+{
+"id": 3,
+"title": "Write 500 Words",
+"description": "Write 500 words on anything — practice consistency and flow.",
+"category": "Creativity",
+"difficulty": "Medium"
+},
+{
+"id": 4,
+"title": "Learn a New Algorithm",
+"description": "Spend 1 hour studying a new algorithm and implement it.",
+"category": "Learning",
+"difficulty": "Hard"
+},
+{
+"id": 5,
+"title": "No Social for 2 Hours",
+"description": "Turn off social apps for two hours and focus on deep work.",
+"category": "Mindfulness",
+"difficulty": "Medium"
+}
+]
