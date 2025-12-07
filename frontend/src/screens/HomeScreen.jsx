@@ -10,21 +10,39 @@ import {
 } from "react-native";
 import ChallengeCard from "../components/ChallengeCard";
 import challengesData from "../data/challenges.json";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const USER_CHALLENGES_KEY = "darely:userChallenges";
 
 export default function HomeScreen({ navigation }) {
   const [challenges, setChallenges] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  async function loadChallenges() {
+    try {
+      const createdRaw = await AsyncStorage.getItem(USER_CHALLENGES_KEY);
+      const created = createdRaw ? JSON.parse(createdRaw) : [];
+
+      // UI ORDER:
+      // 1. created challenges (top)
+      // 2. json base data (below)
+      const combined = [...created, ...challengesData];
+
+      setChallenges(combined);
+    } catch (err) {
+      console.warn("Error loading challenges:", err);
+      setChallenges(challengesData);
+    }
+  }
+
   useEffect(() => {
-    setChallenges(challengesData);
+    loadChallenges();
   }, []);
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setChallenges((prev) => [...prev].reverse());
-      setRefreshing(false);
-    }, 800);
+    await loadChallenges();
+    setTimeout(() => setRefreshing(false), 200);
   }, []);
 
   function openDetails(item) {

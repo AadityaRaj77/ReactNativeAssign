@@ -6,22 +6,49 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert,
+  Text,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const USER_CHALLENGES_KEY = "darely:userChallenges";
 
 export default function CreateChallengesScreen({ navigation }) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [category, setCategory] = useState("");
 
-  function submit() {
-    if (!title.trim() || !desc.trim())
-      return Alert.alert("Error", "Please enter title and description");
-    Alert.alert("Created", "Challenge created locally (demo).");
-    navigation.goBack();
+  async function submit() {
+    if (!title.trim() || !desc.trim() || !category.trim()) {
+      return Alert.alert("Error", "Please enter all fields");
+    }
+    const newItem = {
+      id: Date.now(),
+      title: title.trim(),
+      description: desc.trim(),
+      category: category.trim(),
+      difficulty: "Easy",
+    };
+
+    try {
+      const raw = await AsyncStorage.getItem(USER_CHALLENGES_KEY);
+      const existing = raw ? JSON.parse(raw) : [];
+
+      existing.unshift(newItem);
+
+      await AsyncStorage.setItem(USER_CHALLENGES_KEY, JSON.stringify(existing));
+
+      Alert.alert("Success", "Challenge added!");
+      navigation.goBack();
+    } catch (err) {
+      console.warn(err);
+      Alert.alert("Error", "Could not save challenge");
+    }
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.form}>
+        <Text style={styles.label}>Title</Text>
         <TextInput
           placeholder="Title"
           value={title}
@@ -29,6 +56,7 @@ export default function CreateChallengesScreen({ navigation }) {
           style={styles.input}
           placeholderTextColor="#9ca3af"
         />
+        <Text style={styles.label}>Short description</Text>
         <TextInput
           placeholder="Short description"
           value={desc}
@@ -37,7 +65,18 @@ export default function CreateChallengesScreen({ navigation }) {
           multiline
           placeholderTextColor="#9ca3af"
         />
-        <Button title="Create" onPress={submit} />
+        <Text style={styles.label}>Category</Text>
+        <TextInput
+          placeholder="Category (e.g. Fitness, Creativity)"
+          value={category}
+          onChangeText={setCategory}
+          style={styles.input}
+          placeholderTextColor="#9ca3af"
+        />
+
+        <View style={{ marginTop: 8 }}>
+          <Button title="Create" onPress={submit} />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -55,4 +94,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 12,
   },
+  label: { color: "#9ca3af", marginBottom: 6, fontSize: 13 },
 });
