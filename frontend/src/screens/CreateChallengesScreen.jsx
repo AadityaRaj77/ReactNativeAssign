@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import {
   View,
   TextInput,
-  Button,
   StyleSheet,
   SafeAreaView,
-  Alert,
   Text,
+  TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 
 const USER_CHALLENGES_KEY = "darely:userChallenges";
 const LAST_OPENED_KEY = "darely:lastOpened";
@@ -19,12 +19,8 @@ export default function CreateChallengesScreen({ navigation }) {
   const [category, setCategory] = useState("");
 
   async function submit() {
-    if (!title.trim() || !desc.trim() || !category.trim()) {
-      return Alert.alert(
-        "Error",
-        "Please enter title, description and category"
-      );
-    }
+    if (!title.trim() || !desc.trim() || !category.trim())
+      return alert("Fill all fields");
 
     const newItem = {
       id: Date.now(),
@@ -34,23 +30,18 @@ export default function CreateChallengesScreen({ navigation }) {
       difficulty: "Easy",
     };
 
-    try {
-      const raw = await AsyncStorage.getItem(USER_CHALLENGES_KEY);
-      const existing = raw ? JSON.parse(raw) : [];
-      existing.unshift(newItem);
-      await AsyncStorage.setItem(USER_CHALLENGES_KEY, JSON.stringify(existing));
+    const existingRaw = await AsyncStorage.getItem(USER_CHALLENGES_KEY);
+    const existing = existingRaw ? JSON.parse(existingRaw) : [];
+    existing.unshift(newItem);
+    await AsyncStorage.setItem(USER_CHALLENGES_KEY, JSON.stringify(existing));
 
-      const now = Date.now();
-      const lastOpenedRaw = await AsyncStorage.getItem(LAST_OPENED_KEY);
-      const lastOpened = lastOpenedRaw ? JSON.parse(lastOpenedRaw) : {};
-      lastOpened[newItem.id] = now;
-      await AsyncStorage.setItem(LAST_OPENED_KEY, JSON.stringify(lastOpened));
+    const now = Date.now();
+    const loRaw = await AsyncStorage.getItem(LAST_OPENED_KEY);
+    const lastOpened = loRaw ? JSON.parse(loRaw) : {};
+    lastOpened[newItem.id] = now;
+    await AsyncStorage.setItem(LAST_OPENED_KEY, JSON.stringify(lastOpened));
 
-      navigation.navigate("Home", { fromCreate: now });
-    } catch (err) {
-      console.error("Failed to save challenge:", err);
-      Alert.alert("Error", "Could not save challenge. Try again.");
-    }
+    navigation.navigate("Home", { fromCreate: now });
   }
 
   return (
@@ -58,49 +49,71 @@ export default function CreateChallengesScreen({ navigation }) {
       <View style={styles.form}>
         <Text style={styles.label}>Title</Text>
         <TextInput
-          placeholder="Title"
           value={title}
           onChangeText={setTitle}
+          placeholder="Title"
+          placeholderTextColor="#555"
           style={styles.input}
-          placeholderTextColor="#9ca3af"
-        />
-        <Text style={styles.label}>Short description</Text>
-        <TextInput
-          placeholder="Short description"
-          value={desc}
-          onChangeText={setDesc}
-          style={[styles.input, { height: 120 }]}
-          multiline
-          placeholderTextColor="#9ca3af"
-        />
-        <Text style={styles.label}>Category</Text>
-        <TextInput
-          placeholder="Category (e.g. Fitness, Creativity)"
-          value={category}
-          onChangeText={setCategory}
-          style={styles.input}
-          placeholderTextColor="#9ca3af"
         />
 
-        <View style={{ marginTop: 8 }}>
-          <Button title="Create" onPress={submit} />
-        </View>
+        <Text style={styles.label}>Short Description</Text>
+        <TextInput
+          value={desc}
+          onChangeText={setDesc}
+          multiline
+          placeholder="Describe challenge"
+          placeholderTextColor="#555"
+          style={[styles.input, { height: 110 }]}
+        />
+
+        <Text style={styles.label}>Category</Text>
+        <TextInput
+          value={category}
+          onChangeText={setCategory}
+          placeholder="Fitness, Creativity..."
+          placeholderTextColor="#555"
+          style={styles.input}
+        />
+
+        <TouchableOpacity onPress={submit}>
+          <LinearGradient
+            colors={["#2DE1FC", "#FF0080"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.btn}
+          >
+            <Text style={styles.btnText}>Create Challenge</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#071229", padding: 16 },
-  form: { backgroundColor: "#0b1220", padding: 12, borderRadius: 12 },
-  input: {
+  container: { flex: 1, backgroundColor: "#000000", padding: 20 },
+  form: {
+    backgroundColor: "#0A0A0A",
+    padding: 18,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#111827",
-    backgroundColor: "#071829",
-    color: "#ffffff",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
+    borderColor: "rgba(255,255,255,0.06)",
   },
-  label: { color: "#9ca3af", marginBottom: 6, fontSize: 13 },
+  label: { color: "#AAAAAA", marginBottom: 6, fontSize: 13 },
+  input: {
+    backgroundColor: "#050505",
+    color: "#FFF",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  btn: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  btnText: { color: "#000", fontWeight: "900", fontSize: 15 },
 });
