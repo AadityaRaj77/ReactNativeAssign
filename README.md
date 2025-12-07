@@ -30,8 +30,8 @@ README.md
 ### 1. Clone the project
 
 ```sh
-git clone https://github.com/your-username/darely-app.git
-cd darely-app
+git clone https://github.com/your-username/ReactNativeAssign.git
+cd frontend
 ```
 
 ### 2. Install dependencies
