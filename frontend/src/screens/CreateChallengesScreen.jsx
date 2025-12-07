@@ -11,6 +11,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const USER_CHALLENGES_KEY = "darely:userChallenges";
+const LAST_OPENED_KEY = "darely:lastOpened";
 
 export default function CreateChallengesScreen({ navigation }) {
   const [title, setTitle] = useState("");
@@ -19,8 +20,12 @@ export default function CreateChallengesScreen({ navigation }) {
 
   async function submit() {
     if (!title.trim() || !desc.trim() || !category.trim()) {
-      return Alert.alert("Error", "Please enter all fields");
+      return Alert.alert(
+        "Error",
+        "Please enter title, description and category"
+      );
     }
+
     const newItem = {
       id: Date.now(),
       title: title.trim(),
@@ -32,16 +37,19 @@ export default function CreateChallengesScreen({ navigation }) {
     try {
       const raw = await AsyncStorage.getItem(USER_CHALLENGES_KEY);
       const existing = raw ? JSON.parse(raw) : [];
-
       existing.unshift(newItem);
-
       await AsyncStorage.setItem(USER_CHALLENGES_KEY, JSON.stringify(existing));
 
-      Alert.alert("Success", "Challenge added!");
-      navigation.goBack();
+      const now = Date.now();
+      const lastOpenedRaw = await AsyncStorage.getItem(LAST_OPENED_KEY);
+      const lastOpened = lastOpenedRaw ? JSON.parse(lastOpenedRaw) : {};
+      lastOpened[newItem.id] = now;
+      await AsyncStorage.setItem(LAST_OPENED_KEY, JSON.stringify(lastOpened));
+
+      navigation.navigate("Home", { fromCreate: now });
     } catch (err) {
-      console.warn(err);
-      Alert.alert("Error", "Could not save challenge");
+      console.error("Failed to save challenge:", err);
+      Alert.alert("Error", "Could not save challenge. Try again.");
     }
   }
 
